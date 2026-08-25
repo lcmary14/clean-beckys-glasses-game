@@ -27,7 +27,6 @@
       flex-direction: column;
       align-items: center;
     }
-    /* 中英雙語說明樣式 */
     .game-instructions {
       background: #ffffff;
       border: 2px solid #ffb6c1;
@@ -56,7 +55,6 @@
       cursor: none;
       touch-action: none;
     }
-    /* 雙語計分板樣式 */
     .info-panel {
       display: flex;
       justify-content: space-between;
@@ -72,16 +70,8 @@
       flex-direction: column;
       align-items: center;
     }
-    .info-main {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .info-sub {
-      font-size: 12px;
-      color: #b56576;
-      margin-top: 2px;
-    }
-    /* 雙語按鈕樣式 */
+    .info-main { font-size: 18px; font-weight: bold; }
+    .info-sub { font-size: 12px; color: #b56576; margin-top: 2px; }
     button {
       padding: 10px 28px;
       background: #ff69b4;
@@ -98,18 +88,53 @@
     button:hover { background: #ff1493; transform: scale(1.05); }
     .btn-zh { font-size: 18px; font-weight: bold; }
     .btn-en { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+
+    /* 排行榜樣式 */
+    .leaderboard-box {
+      margin-top: 20px;
+      background: #ffffff;
+      border: 2px solid #ffb6c1;
+      border-radius: 16px;
+      padding: 15px 20px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-sizing: border-box;
+    }
+    .leaderboard-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #d87093;
+      margin-bottom: 10px;
+    }
+    .leaderboard-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: left;
+    }
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #ffd1dc;
+      font-size: 14px;
+      color: #555;
+    }
+    .leaderboard-item:last-child { border-bottom: none; }
+    .rank-num { font-weight: bold; color: #ff69b4; width: 30px; }
+    .player-name { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .player-score { font-weight: bold; color: #d87093; }
   </style>
 </head>
 <body>
 
 <div id="game-container">
-  <!-- 💡 1. 遊戲上方中英雙語玩法說明 -->
   <div class="game-instructions">
     <div class="zh-text">請點選「遊戲開始」，幫Becky把眼鏡擦乾淨，看看30秒可以擦完幾副眼鏡！</div>
     <div class="en-text">Click "Start Game" and wipe Becky's glasses clean. See how many pairs of glasses you can wipe in 30 seconds!</div>
   </div>
 
-  <!-- 💡 2. 雙語遊戲狀態欄 -->
   <div class="info-panel">
     <div class="info-box">
       <div class="info-main">時間：<span id="timer">30</span> 秒</div>
@@ -124,14 +149,22 @@
   <canvas id="gameCanvas" width="400" height="400"></canvas>
   <br>
 
-  <!-- 💡 3. 雙語開始按鈕 -->
   <button id="start-btn" onclick="startGame()">
     <span class="btn-zh">開始遊戲</span>
     <span class="btn-en">Start Game</span>
   </button>
+
+  <!-- 全球排行榜 UI -->
+  <div class="leaderboard-box">
+    <div class="leaderboard-title">🏆 全球排行榜 Global Leaderboard</div>
+    <ol class="leaderboard-list" id="leaderboard"></ol>
+  </div>
 </div>
 
 <script>
+// ⚠️ 請填入你在 Firebase 申請到的 Realtime Database URL
+const FIREBASE_DB_URL = "YOUR_FIREBASE_DATABASE_URL";
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -140,14 +173,9 @@ fogCanvas.width = 400;
 fogCanvas.height = 400;
 const fogCtx = fogCanvas.getContext('2d');
 
-const imgBecky = new Image();
-imgBecky.src = 'becky.png';
-
-const imgCloth = new Image();
-imgCloth.src = 'cloth.png';
-
-const imgMask = new Image();
-imgMask.src = 'mask.png';
+const imgBecky = new Image(); imgBecky.src = 'becky.png';
+const imgCloth = new Image(); imgCloth.src = 'cloth.png';
+const imgMask = new Image(); imgMask.src = 'mask.png';
 
 let score = 0;
 let timeLeft = 30;
@@ -164,7 +192,6 @@ const rightLens = { x: 245, y: 195 };
 function resetFog() {
   leftHits = 0;
   rightHits = 0;
-
   fogCtx.clearRect(0, 0, 400, 400);
 
   if (imgMask.complete && imgMask.naturalWidth !== 0) {
@@ -199,21 +226,12 @@ function getCanvasPos(e) {
 function handleWipe(pos) {
   if (!isPlaying) return;
 
-  const inLeft = Math.abs(pos.x - leftLens.x) < 50 && 
-                 Math.abs(pos.y - leftLens.y) < 40;
-
-  const inRight = Math.abs(pos.x - rightLens.x) < 50 && 
-                  Math.abs(pos.y - rightLens.y) < 40;
+  const inLeft = Math.abs(pos.x - leftLens.x) < 50 && Math.abs(pos.y - leftLens.y) < 40;
+  const inRight = Math.abs(pos.x - rightLens.x) < 50 && Math.abs(pos.y - rightLens.y) < 40;
 
   let erased = false;
-
-  if (inLeft && leftHits < 5) {
-    leftHits++;
-    erased = true;
-  } else if (inRight && rightHits < 5) {
-    rightHits++;
-    erased = true;
-  }
+  if (inLeft && leftHits < 5) { leftHits++; erased = true; }
+  else if (inRight && rightHits < 5) { rightHits++; erased = true; }
 
   if (erased) {
     fogCtx.globalCompositeOperation = 'destination-out';
@@ -237,35 +255,17 @@ function updateUI() {
   document.getElementById('timer-en').innerText = timeLeft;
 }
 
-// 事件監聽
-canvas.addEventListener('mousemove', (e) => {
-  mousePos = getCanvasPos(e);
-  if (!isPlaying) drawScene();
-});
-
-canvas.addEventListener('click', (e) => {
-  const pos = getCanvasPos(e);
-  handleWipe(pos);
-});
-
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  mousePos = getCanvasPos(e);
-  handleWipe(mousePos);
-}, { passive: false });
-
-canvas.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-  mousePos = getCanvasPos(e);
-  handleWipe(mousePos);
-}, { passive: false });
+// 監聽事件
+canvas.addEventListener('mousemove', (e) => { mousePos = getCanvasPos(e); if (!isPlaying) drawScene(); });
+canvas.addEventListener('click', (e) => { handleWipe(getCanvasPos(e)); });
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); mousePos = getCanvasPos(e); handleWipe(mousePos); }, { passive: false });
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); mousePos = getCanvasPos(e); handleWipe(mousePos); }, { passive: false });
 
 function startGame() {
   score = 0;
   timeLeft = 30;
   isPlaying = true;
   updateUI();
-
   resetFog();
 
   if (gameInterval) clearInterval(gameInterval);
@@ -276,11 +276,73 @@ function startGame() {
     if (timeLeft <= 0) {
       clearInterval(gameInterval);
       isPlaying = false;
-      alert(`🎉 時間到！ Time's up!\n你成功幫 Becky 擦乾淨了 ${score} 副眼鏡！\nYou wiped ${score} pairs of glasses clean!`);
+      finishGame();
     }
   }, 1000);
 
   gameLoop();
+}
+
+function finishGame() {
+  const playerName = prompt(`🎉 時間到！ Time's up!\n你成功幫 Becky 擦乾淨了 ${score} 副眼鏡！\n請輸入你的名字以登記排行榜 (Enter your name for the leaderboard):`, "Becky Fan");
+  
+  if (playerName && FIREBASE_DB_URL !== "YOUR_FIREBASE_DATABASE_URL") {
+    submitScore(playerName, score);
+  } else {
+    fetchLeaderboard();
+  }
+}
+
+// 提交成績至 Firebase
+async function submitScore(name, finalScore) {
+  try {
+    await fetch(`${FIREBASE_DB_URL}/scores.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, score: finalScore, timestamp: Date.now() })
+    });
+    fetchLeaderboard();
+  } catch (err) {
+    console.error("提交成績失敗:", err);
+  }
+}
+
+// 讀取全球前 10 名排行榜
+async function fetchLeaderboard() {
+  if (FIREBASE_DB_URL === "YOUR_FIREBASE_DATABASE_URL") return;
+
+  try {
+    const res = await fetch(`${FIREBASE_DB_URL}/scores.json`);
+    const data = await res.json();
+    
+    if (!data) return;
+
+    const scoresArray = Object.values(data);
+    scoresArray.sort((a, b) => b.score - a.score); // 依分數由高到低排序
+
+    const top10 = scoresArray.slice(0, 10);
+    const listEl = document.getElementById('leaderboard');
+    listEl.innerHTML = '';
+
+    top10.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'leaderboard-item';
+      li.innerHTML = `
+        <span class="rank-num">#${index + 1}</span>
+        <span class="player-name">${escapeHTML(item.name)}</span>
+        <span class="player-score">${item.score} 副</span>
+      `;
+      listEl.appendChild(li);
+    });
+  } catch (err) {
+    console.error("讀取排行榜失敗:", err);
+  }
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
 }
 
 function gameLoop() {
@@ -290,13 +352,8 @@ function gameLoop() {
 
 function drawScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (imgBecky.complete && imgBecky.naturalWidth !== 0) {
-    ctx.drawImage(imgBecky, 0, 0, 400, 400);
-  } else {
-    ctx.fillStyle = "#e0e0e0";
-    ctx.fillRect(0, 0, 400, 400);
-  }
+  if (imgBecky.complete && imgBecky.naturalWidth !== 0) ctx.drawImage(imgBecky, 0, 0, 400, 400);
+  else { ctx.fillStyle = "#e0e0e0"; ctx.fillRect(0, 0, 400, 400); }
 
   ctx.drawImage(fogCanvas, 0, 0);
 
@@ -317,6 +374,7 @@ const checkAllLoaded = () => {
   if (loadedCount >= 2) {
     resetFog();
     drawScene();
+    fetchLeaderboard();
   }
 };
 
