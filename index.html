@@ -125,6 +125,25 @@
     .rank-num { font-weight: bold; color: #ff69b4; width: 30px; }
     .player-name { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .player-score { font-weight: bold; color: #d87093; }
+
+    /* 版權宣告區塊樣式 */
+    .copyright-box {
+      margin-top: 25px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px dashed #ffb6c1;
+      border-radius: 12px;
+      padding: 12px 16px;
+      width: 100%;
+      max-width: 360px;
+      box-sizing: border-box;
+      text-align: left;
+      font-size: 11px;
+      color: #777;
+      line-height: 1.5;
+    }
+    .copyright-section { margin-bottom: 8px; }
+    .copyright-section:last-child { margin-bottom: 0; }
+    .copyright-title { font-weight: bold; color: #b56576; }
   </style>
 </head>
 <body>
@@ -159,11 +178,29 @@
     <div class="leaderboard-title">🏆 全球排行榜 Global Leaderboard</div>
     <ol class="leaderboard-list" id="leaderboard"></ol>
   </div>
+
+  <!-- 版權與免責宣告 -->
+  <div class="copyright-box">
+    <div class="copyright-section">
+      <div class="copyright-title">【影片/畫面出處】</div>
+      原著 / 製作公司：IDOL FACTORY<br>
+      作品名稱：CRANIUM（《親愛的植物學家》/ 相關影音）<br>
+      演出演員：[演員A姓名] & [演員B姓名]<br>
+      聲明：本遊戲內容/影片僅供粉絲娛樂互動使用，無任何商業營利行為。畫面著作權歸原製作公司 IDOL FACTORY 所有。
+    </div>
+    <div class="copyright-section">
+      <div class="copyright-title">(English version)</div>
+      Footage Credit: IDOL FACTORY<br>
+      Series: CRANIUM<br>
+      Cast: [Actor 1 Name] & [Actor 2 Name]<br>
+      Disclaimer: Non-commercial fan-made content. All video materials and copyrights belong to IDOL FACTORY.
+    </div>
+  </div>
 </div>
 
 <script>
-// ⚠️ 請填入你在 Firebase 申請到的 Realtime Database URL
-const FIREBASE_DB_URL = "YOUR_FIREBASE_DATABASE_URL";
+// 已為您填入 Firebase Realtime Database URL
+const FIREBASE_DB_URL = "https://clean-beckys-glasses-game-default-rtdb.firebaseio.com/";
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
