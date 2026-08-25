@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Becky 30秒極速擦眼鏡挑戰！</title>
   <style>
     body {
@@ -14,6 +15,8 @@
       height: 100vh;
       margin: 0;
       user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
     }
     #game-container {
       text-align: center;
@@ -24,15 +27,19 @@
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       cursor: none;
+      touch-action: none; /* 防止手機拖動畫面 */
     }
     .info-panel {
       display: flex;
       justify-content: space-between;
-      width: 400px;
+      width: 100%;
+      max-width: 400px;
       font-size: 20px;
       font-weight: bold;
       color: #d87093;
       margin-bottom: 12px;
+      box-sizing: border-box;
+      padding: 0 10px;
     }
     button {
       padding: 12px 28px;
@@ -65,13 +72,11 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// 離屏 Canvas 處理霧氣遮罩
 const fogCanvas = document.createElement('canvas');
 fogCanvas.width = 400;
 fogCanvas.height = 400;
 const fogCtx = fogCanvas.getContext('2d');
 
-// 載入素材
 const imgBecky = new Image();
 imgBecky.src = 'becky.png';
 
@@ -90,11 +95,9 @@ let mousePos = { x: 200, y: 200 };
 let leftHits = 0;
 let rightHits = 0;
 
-// 左右鏡片中心點
 const leftLens = { x: 155, y: 195 };
 const rightLens = { x: 245, y: 195 };
 
-// 重置霧氣（透明度設為 60%）
 function resetFog() {
   leftHits = 0;
   rightHits = 0;
@@ -102,38 +105,47 @@ function resetFog() {
   fogCtx.clearRect(0, 0, 400, 400);
 
   if (imgMask.complete && imgMask.naturalWidth !== 0) {
-    // 💡 1. 霧氣透明度設定為 60% (alpha 0.6)
     fogCtx.fillStyle = 'rgba(230, 235, 245, 0.6)';
     fogCtx.fillRect(0, 0, 400, 400);
 
-    // 2. 裁剪成 mask.png 的鏡片形狀
     fogCtx.globalCompositeOperation = 'destination-in';
     fogCtx.drawImage(imgMask, 0, 0, 400, 400);
     fogCtx.globalCompositeOperation = 'source-over';
   }
 }
 
-canvas.addEventListener('mousemove', (e) => {
+// 取得座標（兼容滑鼠與觸控）
+function getCanvasPos(e) {
   const rect = canvas.getBoundingClientRect();
-  mousePos.x = e.clientX - rect.left;
-  mousePos.y = e.clientY - rect.top;
-  if (!isPlaying) drawScene();
-});
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
 
-// 點擊擦拭邏輯（提高靈敏度）
-canvas.addEventListener('click', () => {
+  let clientX = e.clientX;
+  let clientY = e.clientY;
+
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  }
+
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY
+  };
+}
+
+// 核心擦拭處理邏輯
+function handleWipe(pos) {
   if (!isPlaying) return;
 
-  // 💡 放寬判定範圍至 50x40 像素，更容易點中
-  const inLeft = Math.abs(mousePos.x - leftLens.x) < 50 && 
-                 Math.abs(mousePos.y - leftLens.y) < 40;
+  const inLeft = Math.abs(pos.x - leftLens.x) < 50 && 
+                 Math.abs(pos.y - leftLens.y) < 40;
 
-  const inRight = Math.abs(mousePos.x - rightLens.x) < 50 && 
-                  Math.abs(mousePos.y - rightLens.y) < 40;
+  const inRight = Math.abs(pos.x - rightLens.x) < 50 && 
+                  Math.abs(pos.y - rightLens.y) < 40;
 
   let erased = false;
 
-  // 💡 下降目標次數至 5 下，速度更快
   if (inLeft && leftHits < 5) {
     leftHits++;
     erased = true;
@@ -142,11 +154,10 @@ canvas.addEventListener('click', () => {
     erased = true;
   }
 
-  // 💡 擦除半徑放大到 32px，一次擦乾淨大半區域
   if (erased) {
     fogCtx.globalCompositeOperation = 'destination-out';
     fogCtx.beginPath();
-    fogCtx.arc(mousePos.x, mousePos.y, 32, 0, Math.PI * 2);
+    fogCtx.arc(pos.x, pos.y, 32, 0, Math.PI * 2);
     fogCtx.fill();
     fogCtx.globalCompositeOperation = 'source-over';
   }
@@ -156,7 +167,31 @@ canvas.addEventListener('click', () => {
     document.getElementById('score').innerText = score;
     resetFog();
   }
+}
+
+// --- 滑鼠事件 ---
+canvas.addEventListener('mousemove', (e) => {
+  mousePos = getCanvasPos(e);
+  if (!isPlaying) drawScene();
 });
+
+canvas.addEventListener('click', (e) => {
+  const pos = getCanvasPos(e);
+  handleWipe(pos);
+});
+
+// --- 手機觸控事件 (Touch) ---
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  mousePos = getCanvasPos(e);
+  handleWipe(mousePos);
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  mousePos = getCanvasPos(e);
+  handleWipe(mousePos);
+}, { passive: false });
 
 function startGame() {
   score = 0;
@@ -190,7 +225,6 @@ function gameLoop() {
 function drawScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // A. Becky 底圖
   if (imgBecky.complete && imgBecky.naturalWidth !== 0) {
     ctx.drawImage(imgBecky, 0, 0, 400, 400);
   } else {
@@ -198,10 +232,8 @@ function drawScene() {
     ctx.fillRect(0, 0, 400, 400);
   }
 
-  // B. 疊加 60% 透明度霧氣層
   ctx.drawImage(fogCanvas, 0, 0);
 
-  // C. 眼鏡布/手 (70x70 像素)
   const clothSize = 70;
   if (imgCloth.complete && imgCloth.naturalWidth !== 0) {
     ctx.drawImage(imgCloth, mousePos.x - clothSize / 2, mousePos.y - clothSize / 2, clothSize, clothSize);
@@ -213,7 +245,6 @@ function drawScene() {
   }
 }
 
-// 素材預載保護
 let loadedCount = 0;
 const checkAllLoaded = () => {
   loadedCount++;
