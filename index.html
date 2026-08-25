@@ -1,232 +1,323 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>30秒極速擦眼鏡挑戰</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #f4f4f9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .game-container {
-      background: #fff;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      text-align: center;
-      max-width: 500px;
-      width: 100%;
-    }
-    h1 {
-      font-size: 22px;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    .hud {
-      display: flex;
-      justify-content: space-between;
-      font-size: 18px;
-      font-weight: bold;
-      color: #555;
-      margin-bottom: 15px;
-    }
-    .canvas-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 400px;
-      height: 400px;
-      margin: 0 auto;
-      border-radius: 12px;
-      overflow: hidden;
-      touch-action: none;
-    }
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-    .controls {
-      margin-top: 15px;
-    }
-    button {
-      background: #ff6b81;
-      color: white;
-      border: none;
-      padding: 10px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background: #ff4757;
-    }
-    /* 底部聲明樣式 */
-    .disclaimer-footer {
-      margin-top: 25px;
-      padding-top: 15px;
-      border-top: 1px solid #eee;
-      font-size: 12px;
-      color: #777;
-      line-height: 1.6;
-      text-align: center;
-    }
-    .disclaimer-footer p {
-      margin-bottom: 6px;
-    }
-    .disclaimer-footer strong {
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>泰國售票驗證 - 競速挑戰版</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .captcha-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            text-align: center;
+            width: 320px;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background-color: #ff4757;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* 總耗時顯示看板 */
+        #stopwatch {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2ed573;
+            margin: 8px 0;
+            font-family: monospace;
+        }
+
+        #puzzle-container {
+            width: 280px;
+            height: 280px;
+            margin: 10px auto;
+            background-color: #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 2px;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .tile {
+            width: 100%;
+            background-image: url('https://picsum.photos/280/280');
+            background-size: 280px 280px;
+            cursor: pointer;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: transform 0.1s, border 0.1s;
+        }
+
+        .tile.selected {
+            outline: 4px solid #ff4757;
+            transform: scale(0.98);
+            z-index: 2;
+        }
+
+        #status {
+            font-weight: bold;
+            height: 20px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #a4b0be;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: not-allowed;
+            margin-top: 5px;
+        }
+
+        .submit-btn.active {
+            background-color: #ff4757;
+            cursor: pointer;
+        }
+
+        /* 排行榜樣式 */
+        .leaderboard {
+            margin-top: 15px;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .leaderboard h4 {
+            margin: 0 0 5px 0;
+            text-align: center;
+        }
+        .leaderboard ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="game-container">
-    <h1>👓 30秒極速擦眼鏡挑戰</h1>
+<div class="captcha-box">
+    <div id="level-badge" class="level-badge">關卡 1 / 3 (4 格挑戰)</div>
     
-    <div class="hud">
-      <div>時間: <span id="timer">30</span>s</div>
-      <div>得分: <span id="score">0</span></div>
+    <!-- 累積計時器與關卡限時 -->
+    <div id="stopwatch">總花費時間: 0.00 秒</div>
+    <div id="status">本關剩餘: <span id="timer" style="color: red;">15</span>s</div>
+
+    <div id="puzzle-container"></div>
+
+    <button id="buy-btn" class="submit-btn" disabled onclick="enterTicketPage()">等待全關卡通過...</button>
+
+    <!-- 歷史名次榜 -->
+    <div class="leaderboard">
+        <h4>🏆 最佳搶票速度排行榜</h4>
+        <ol id="high-scores"></ol>
     </div>
+</div>
 
-    <div class="canvas-wrapper">
-      <!-- 底層清晰照片 -->
-      <canvas id="bgCanvas" width="400" height="400"></canvas>
-      <!-- 上層霧化/髒汙層 -->
-      <canvas id="fogCanvas" width="400" height="400"></canvas>
-    </div>
+<script>
+    const container = document.getElementById('puzzle-container');
+    const timerEl = document.getElementById('timer');
+    const stopwatchEl = document.getElementById('stopwatch');
+    const buyBtn = document.getElementById('buy-btn');
+    const statusEl = document.getElementById('status');
+    const levelBadge = document.getElementById('level-badge');
+    const highScoresEl = document.getElementById('high-scores');
 
-    <div class="controls">
-      <button id="startBtn" onclick="startGame()">開始遊戲</button>
-    </div>
+    const levels = [
+        { level: 1, pieces: 4, time: 15 },
+        { level: 2, pieces: 5, time: 15 },
+        { level: 3, pieces: 6, time: 20 }
+    ];
 
-    <!-- 頁尾出處與免責聲明 -->
-    <footer class="disclaimer-footer">
-      <p><strong>圖片出處：</strong>IDOLFACTORY / CRANIUM</p>
-      <p><strong>聲明：</strong>本遊戲內容/影片僅供粉絲娛樂互動使用，無任何商業營利行為。畫面著作權歸原製作公司 IDOL FACTORY 所有。</p>
-      <hr style="border: none; border-top: 1px dashed #ddd; margin: 8px 0;">
-      <p><strong>Credit:</strong> IDOLFACTORY / CRANIUM</p>
-      <p><strong>Disclaimer:</strong> Non-commercial fan-made content. All video materials and copyrights belong to IDOLFACTORY.</p>
-    </footer>
-  </div>
-
-  <script>
-    const fogCanvas = document.getElementById('fogCanvas');
-    const fogCtx = fogCanvas.getContext('2d');
-    const bgCanvas = document.getElementById('bgCanvas');
-    const bgCtx = bgCanvas.getContext('2d');
+    let currentLevelIndex = 0;
+    let currentOrder = [];
+    let selectedIndex = null;
+    let timeLeft = 0;
     
-    let isDrawing = false;
-    let score = 0;
-    let timeLeft = 30;
-    let gameInterval = null;
-    let isPlaying = false;
+    // 計時變數
+    let timerInterval;
+    let stopwatchInterval;
+    let startTime = 0;
+    let totalElapsedTime = 0;
 
-    // 請替換為您自己的照片網址
-    const imgUrl = 'https://picsum.photos/400/400'; 
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.src = imgUrl;
+    const imgHeight = 276;
 
-    img.onload = () => {
-      resetGame();
-    };
+    function startLevel(levelIndex) {
+        const config = levels[levelIndex];
+        levelBadge.innerText = `關卡 ${config.level} / ${levels.length} (${config.pieces} 格挑戰)`;
+        timeLeft = config.time;
+        timerEl.innerText = timeLeft;
+        selectedIndex = null;
 
-    function resetGame() {
-      // 繪製底層清晰圖
-      bgCtx.drawImage(img, 0, 0, 400, 400);
-
-      // 繪製上層霧化/髒汙層
-      fogCtx.fillStyle = 'rgba(200, 200, 200, 0.85)';
-      fogCtx.fillRect(0, 0, 400, 400);
-      fogCtx.fillStyle = '#666';
-      fogCtx.font = '20px Arial';
-      fogCtx.textAlign = 'center';
-      fogCtx.fillText('按下「開始遊戲」塗擦眼鏡！', 200, 200);
-    }
-
-    function initFogLayer() {
-      fogCtx.globalCompositeOperation = 'source-over';
-      fogCtx.fillStyle = 'rgba(220, 220, 220, 0.95)';
-      fogCtx.fillRect(0, 0, 400, 400);
-    }
-
-    function startGame() {
-      if (isPlaying) return;
-      isPlaying = true;
-      score = 0;
-      timeLeft = 30;
-      document.getElementById('score').innerText = score;
-      document.getElementById('timer').innerText = timeLeft;
-      document.getElementById('startBtn').innerText = '遊戲進行中...';
-
-      initFogLayer();
-
-      // 啟動倒數計時
-      gameInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById('timer').innerText = timeLeft;
-        if (timeLeft <= 0) {
-          endGame();
+        // 若是第一關，啟動總時間計時器
+        if (levelIndex === 0) {
+            startTime = Date.now();
+            startStopwatch();
         }
-      }, 1000);
+
+        currentOrder = Array.from({ length: config.pieces }, (_, i) => i);
+        do {
+            currentOrder.sort(() => Math.random() - 0.5);
+        } while (isCorrect());
+
+        renderTiles();
+        startLevelTimer();
     }
 
-    function endGame() {
-      clearInterval(gameInterval);
-      isPlaying = false;
-      document.getElementById('startBtn').innerText = '再試一次';
-      alert(`時間到！你的最終得分為：${score} 分！`);
+    function renderTiles() {
+        container.innerHTML = '';
+        const config = levels[currentLevelIndex];
+        const pieceHeight = imgHeight / config.pieces;
+
+        currentOrder.forEach((posIndex, currentIndex) => {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            tile.style.height = `${pieceHeight}px`;
+
+            const posY = -posIndex * pieceHeight;
+            tile.style.backgroundPosition = `0px ${posY}px`;
+
+            if (selectedIndex === currentIndex) {
+                tile.classList.add('selected');
+            }
+
+            tile.onclick = () => handleTileClick(currentIndex);
+            container.appendChild(tile);
+        });
     }
 
-    // 擦拭邏輯 (橡皮擦效果)
-    function clearFog(x, y) {
-      if (!isPlaying) return;
+    function handleTileClick(index) {
+        if (timeLeft <= 0) return;
 
-      fogCtx.globalCompositeOperation = 'destination-out';
-      fogCtx.beginPath();
-      fogCtx.arc(x, y, 25, 0, Math.PI * 2, false);
-      fogCtx.fill();
+        if (selectedIndex === null) {
+            selectedIndex = index;
+        } else if (selectedIndex === index) {
+            selectedIndex = null;
+        } else {
+            const temp = currentOrder[selectedIndex];
+            currentOrder[selectedIndex] = currentOrder[index];
+            currentOrder[index] = temp;
+            selectedIndex = null;
 
-      // 每次擦拭加分
-      score += 10;
-      document.getElementById('score').innerText = score;
+            if (isCorrect()) {
+                handleLevelComplete();
+            }
+        }
+        renderTiles();
     }
 
-    // 滑鼠與觸控事件監聽
-    function getPos(e) {
-      const rect = fogCanvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-      };
+    function isCorrect() {
+        return currentOrder.every((val, index) => val === index);
     }
 
-    fogCanvas.addEventListener('mousedown', (e) => { isDrawing = true; const pos = getPos(e); clearFog(pos.x, pos.y); });
-    fogCanvas.addEventListener('mousemove', (e) => { if (isDrawing) { const pos = getPos(e); clearFog(pos.x, pos.y); } });
-    fogCanvas.addEventListener('mouseup', () => isDrawing = false);
-    fogCanvas.addEventListener('mouseleave', () => isDrawing = false);
+    // 總耗時毫秒計時器
+    function startStopwatch() {
+        clearInterval(stopwatchInterval);
+        stopwatchInterval = setInterval(() => {
+            totalElapsedTime = (Date.now() - startTime) / 1000;
+            stopwatchEl.innerText = `總花費時間: ${totalElapsedTime.toFixed(2)} 秒`;
+        }, 30);
+    }
 
-    fogCanvas.addEventListener('touchstart', (e) => { isDrawing = true; const pos = getPos(e); clearFog(pos.x, pos.y); });
-    fogCanvas.addEventListener('touchmove', (e) => { if (isDrawing) { const pos = getPos(e); clearFog(pos.x, pos.y); } });
-    fogCanvas.addEventListener('touchend', () => isDrawing = false);
-  </script>
+    // 單關倒數計時器
+    function startLevelTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerEl.innerText = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                clearInterval(stopwatchInterval);
+                statusEl.innerHTML = "<span style='color:red;'>逾時失敗！重新挑戰</span>";
+                setTimeout(resetAll, 1500);
+            }
+        }, 1000);
+    }
+
+    function handleLevelComplete() {
+        clearInterval(timerInterval);
+
+        if (currentLevelIndex + 1 < levels.length) {
+            statusEl.innerHTML = "<span style='color:green;'>✓ 通過！準備進入下一關...</span>";
+            currentLevelIndex++;
+            setTimeout(() => {
+                statusEl.innerHTML = '本關剩餘: <span id="timer" style="color: red;">15</span>s';
+                startLevel(currentLevelIndex);
+            }, 800);
+        } else {
+            // 通過所有關卡：停止總計時並紀錄成績
+            clearInterval(stopwatchInterval);
+            statusEl.innerHTML = "<span style='color:green;'>🎉 驗證成功！已獲得購票資格</span>";
+            
+            saveScore(totalElapsedTime);
+            
+            buyBtn.disabled = false;
+            buyBtn.classList.add('active');
+            buyBtn.innerText = `立即搶票 (總費時: ${totalElapsedTime.toFixed(2)}s)`;
+        }
+    }
+
+    function resetAll() {
+        currentLevelIndex = 0;
+        statusEl.innerHTML = '本關剩餘: <span id="timer" style="color: red;">15</span>s';
+        buyBtn.disabled = true;
+        buyBtn.classList.remove('active');
+        buyBtn.innerText = "等待全關卡通過...";
+        startLevel(currentLevelIndex);
+    }
+
+    // 排行榜紀錄邏輯 (由短至長排序)
+    function saveScore(score) {
+        let scores = JSON.parse(localStorage.getItem('ticket_captcha_scores') || '[]');
+        scores.push(score);
+        scores.sort((a, b) => a - b); // 最短時間排前面
+        scores = scores.slice(0, 5); // 只留前 5 名
+        localStorage.setItem('ticket_captcha_scores', JSON.stringify(scores));
+        updateLeaderboardDisplay();
+    }
+
+    function updateLeaderboardDisplay() {
+        let scores = JSON.parse(localStorage.getItem('ticket_captcha_scores') || '[]');
+        highScoresEl.innerHTML = scores.map((s, idx) => 
+            `<li>第 ${idx + 1} 名：<b>${s.toFixed(2)}</b> 秒</li>`
+        ).join('') || '<li>暫無最佳紀錄</li>';
+    }
+
+    function enterTicketPage() {
+        alert(`搶票成功！你的完成時間為：${totalElapsedTime.toFixed(2)} 秒`);
+        resetAll();
+    }
+
+    // 遊戲初始化
+    updateLeaderboardDisplay();
+    startLevel(currentLevelIndex);
+</script>
+
 </body>
 </html>
