@@ -252,7 +252,7 @@
   <div class="modal-box">
     <div class="modal-title">🎉 時間到！ Becky 看得好清楚!</div>
     <div id="modal-msg" class="modal-msg">你成功幫 Becky 擦乾淨了 0 副眼鏡！<br>請輸入你的名字以登記排行榜：</div>
-    <input type="text" id="player-name-input" class="modal-input" placeholder="Becky Angel" maxlength="30">
+    <input type="text" id="player-name-input" class="modal-input" placeholder="Becky's Angel" maxlength="30">
     <div class="modal-btn-group">
       <button class="modal-btn btn-cancel" onclick="closeModal(false)">取消 Cancel</button>
       <button class="modal-btn" onclick="closeModal(true)">送出 Submit</button>
@@ -401,7 +401,7 @@ function closeModal(isSubmit) {
 
 // 提交成績至 Firebase（自動修飾名字以符合 Rules 安全驗證）
 async function submitScore(name, finalScore) {
-  const trimmedName = name.trim().substring(0, 30) || "Becky Angel";
+  const trimmedName = name.trim().substring(0, 30) || "Becky's Angel";
 
   try {
     const response = await fetch(`${FIREBASE_DB_URL}/scores.json`, {
