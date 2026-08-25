@@ -144,6 +144,50 @@
     .copyright-section { margin-bottom: 8px; }
     .copyright-section:last-child { margin-bottom: 0; }
     .copyright-title { font-weight: bold; color: #b56576; }
+
+    /* 自訂 Modal 彈出視窗樣式（替代原生 prompt/alert，防攔截） */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .modal-box {
+      background: #ffffff;
+      border: 3px solid #ffb6c1;
+      border-radius: 20px;
+      padding: 20px;
+      width: 85%;
+      max-width: 320px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .modal-title { font-size: 18px; font-weight: bold; color: #d87093; margin-bottom: 8px; }
+    .modal-msg { font-size: 14px; color: #666; margin-bottom: 15px; line-height: 1.4; }
+    .modal-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ffb6c1;
+      border-radius: 10px;
+      font-size: 15px;
+      box-sizing: border-box;
+      text-align: center;
+      outline: none;
+      margin-bottom: 15px;
+    }
+    .modal-input:focus { border-color: #ff69b4; }
+    .modal-btn-group { display: flex; gap: 10px; justify-content: center; }
+    .modal-btn {
+      padding: 8px 18px;
+      border-radius: 15px;
+      font-size: 14px;
+      margin-top: 0;
+    }
+    .btn-cancel { background: #ccc; }
+    .btn-cancel:hover { background: #aaa; }
   </style>
 </head>
 <body>
@@ -199,6 +243,19 @@
       Credit: IDOLFACTORY / CRANIUM<br>
       Game Creator: Mallie & astro06020616 <br>
       Disclaimer: Non-commercial fan-made content. All video materials and copyrights belong to IDOLFACTORY.
+    </div>
+  </div>
+</div>
+
+<!-- 自訂彈出視窗（替代原生 prompt/alert，防攔截） -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">🎉 時間到！ Time's up!</div>
+    <div id="modal-msg" class="modal-msg">你成功幫 Becky 擦乾淨了 0 副眼鏡！<br>請輸入你的名字以登記排行榜：</div>
+    <input type="text" id="player-name-input" class="modal-input" placeholder="Becky Fan" maxlength="30">
+    <div class="modal-btn-group">
+      <button class="modal-btn btn-cancel" onclick="closeModal(false)">取消 Cancel</button>
+      <button class="modal-btn" onclick="closeModal(true)">送出 Submit</button>
     </div>
   </div>
 </div>
@@ -326,10 +383,17 @@ function startGame() {
 }
 
 function finishGame() {
-  const playerName = prompt(`🎉 時間到！ Time's up!\n你成功幫 Becky 擦乾淨了 ${score} 副眼鏡！\n請輸入你的名字以登記排行榜 (Enter your name for the leaderboard):`, "Becky Fan");
-  
-  if (playerName) {
-    submitScore(playerName, score);
+  document.getElementById('modal-msg').innerHTML = `你成功幫 Becky 擦乾淨了 <b>${score}</b> 副眼鏡！<br>請輸入你的名字以登記排行榜 (Enter your name for the leaderboard):`;
+  document.getElementById('player-name-input').value = "Becky Fan";
+  document.getElementById('modal-overlay').style.display = 'flex';
+  document.getElementById('player-name-input').focus();
+}
+
+function closeModal(isSubmit) {
+  document.getElementById('modal-overlay').style.display = 'none';
+  if (isSubmit) {
+    const inputName = document.getElementById('player-name-input').value;
+    submitScore(inputName, score);
   } else {
     fetchLeaderboard();
   }
@@ -353,7 +417,6 @@ async function submitScore(name, finalScore) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Firebase 拒絕寫入:", errorData);
-      alert("提交成績失敗！請確認 Firebase Rules 設定正確。");
       return;
     }
 
