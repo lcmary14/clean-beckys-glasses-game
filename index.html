@@ -217,7 +217,7 @@ let timeLeft = 30;
 let gameInterval = null;
 let isPlaying = false;
 
-let mousePos = { x: 200, y: 200 };
+let mousePos = { x: 290, y: 195 };
 let leftHits = 0;
 let rightHits = 0;
 
@@ -330,7 +330,7 @@ function finishGame() {
 
 // 提交成績至 Firebase（自動修飾名字以符合 Rules 安全驗證）
 async function submitScore(name, finalScore) {
-  const trimmedName = name.trim().substring(0, 30) || "Becky Fan";
+  const trimmedName = name.trim().substring(0, 30) || "Becky's Angel";
 
   try {
     const response = await fetch(`${FIREBASE_DB_URL}/scores.json`, {
