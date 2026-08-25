@@ -199,7 +199,7 @@
 </div>
 
 <script>
-// 已為您填入 Firebase Realtime Database URL
+// 已設定 Firebase Realtime Database URL
 const FIREBASE_DB_URL = "https://clean-beckys-glasses-game-default-rtdb.firebaseio.com/";
 
 const canvas = document.getElementById('gameCanvas');
@@ -323,43 +323,66 @@ function startGame() {
 function finishGame() {
   const playerName = prompt(`🎉 時間到！ Time's up!\n你成功幫 Becky 擦乾淨了 ${score} 副眼鏡！\n請輸入你的名字以登記排行榜 (Enter your name for the leaderboard):`, "Becky Fan");
   
-  if (playerName && FIREBASE_DB_URL !== "YOUR_FIREBASE_DATABASE_URL") {
+  if (playerName) {
     submitScore(playerName, score);
   } else {
     fetchLeaderboard();
   }
 }
 
-// 提交成績至 Firebase
+// 提交成績至 Firebase（自動修飾名字以符合 Rules 安全驗證）
 async function submitScore(name, finalScore) {
+  const trimmedName = name.trim().substring(0, 30) || "Becky Fan";
+
   try {
-    await fetch(`${FIREBASE_DB_URL}/scores.json`, {
+    const response = await fetch(`${FIREBASE_DB_URL}/scores.json`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, score: finalScore, timestamp: Date.now() })
+      body: JSON.stringify({
+        name: trimmedName,
+        score: finalScore,
+        timestamp: Date.now()
+      })
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Firebase 拒絕寫入:", errorData);
+      alert("提交成績失敗！請確認 Firebase Rules 設定正確。");
+      return;
+    }
+
     fetchLeaderboard();
   } catch (err) {
     console.error("提交成績失敗:", err);
   }
 }
 
-// 讀取全球前 10 名排行榜
+// 讀取全球前 10 名排行榜（含安全驗證與防呆）
 async function fetchLeaderboard() {
   if (FIREBASE_DB_URL === "YOUR_FIREBASE_DATABASE_URL") return;
 
   try {
     const res = await fetch(`${FIREBASE_DB_URL}/scores.json`);
+    if (!res.ok) {
+      console.error("讀取排行榜被拒絕，HTTP 狀態碼:", res.status);
+      return;
+    }
+
     const data = await res.json();
-    
-    if (!data) return;
-
-    const scoresArray = Object.values(data);
-    scoresArray.sort((a, b) => b.score - a.score); // 依分數由高到低排序
-
-    const top10 = scoresArray.slice(0, 10);
     const listEl = document.getElementById('leaderboard');
     listEl.innerHTML = '';
+    
+    if (!data) {
+      listEl.innerHTML = '<li class="leaderboard-item" style="justify-content:center; color:#999;">尚無紀錄，快來搶第一名！</li>';
+      return;
+    }
+
+    // 將物件轉換為陣列並由高到低排序
+    const scoresArray = Object.values(data);
+    scoresArray.sort((a, b) => b.score - a.score);
+
+    const top10 = scoresArray.slice(0, 10);
 
     top10.forEach((item, index) => {
       const li = document.createElement('li');
