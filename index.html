@@ -252,7 +252,7 @@
   <div class="modal-box">
     <div class="modal-title">🎉 時間到！ Time's up!</div>
     <div id="modal-msg" class="modal-msg">你成功幫 Becky 擦乾淨了 0 副眼鏡！<br>請輸入你的名字以登記排行榜：</div>
-    <input type="text" id="player-name-input" class="modal-input" placeholder="Becky Fan" maxlength="30">
+    <input type="text" id="player-name-input" class="modal-input" placeholder="Becky's Angel" maxlength="30">
     <div class="modal-btn-group">
       <button class="modal-btn btn-cancel" onclick="closeModal(false)">取消 Cancel</button>
       <button class="modal-btn" onclick="closeModal(true)">送出 Submit</button>
@@ -384,7 +384,7 @@ function startGame() {
 
 function finishGame() {
   document.getElementById('modal-msg').innerHTML = `你成功幫 Becky 擦乾淨了 <b>${score}</b> 副眼鏡！<br>請輸入你的名字以登記排行榜 (Enter your name for the leaderboard):`;
-  document.getElementById('player-name-input').value = "Becky Fan";
+  document.getElementById('player-name-input').value = "Becky's Angel";
   document.getElementById('modal-overlay').style.display = 'flex';
   document.getElementById('player-name-input').focus();
 }
