@@ -1,322 +1,386 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泰國售票驗證 - 競速挑戰版</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            user-select: none;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Becky 30秒極速擦眼鏡挑戰！</title>
+  <style>
+    body {
+      background: #fff0f5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    #game-container {
+      text-align: center;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .game-instructions {
+      background: #ffffff;
+      border: 2px solid #ffb6c1;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 15px;
+      max-width: 380px;
+      box-shadow: 0 2px 8px rgba(255, 182, 193, 0.3);
+    }
+    .game-instructions .zh-text {
+      color: #d87093;
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+    .game-instructions .en-text {
+      color: #8b5a2b;
+      font-size: 13px;
+      line-height: 1.3;
+    }
+    canvas {
+      border: 4px solid #ffb6c1;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      cursor: none;
+      touch-action: none;
+    }
+    .info-panel {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 400px;
+      color: #d87093;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      padding: 0 10px;
+    }
+    .info-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .info-main { font-size: 18px; font-weight: bold; }
+    .info-sub { font-size: 12px; color: #b56576; margin-top: 2px; }
+    button {
+      padding: 10px 28px;
+      background: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    button:hover { background: #ff1493; transform: scale(1.05); }
+    .btn-zh { font-size: 18px; font-weight: bold; }
+    .btn-en { font-size: 12px; opacity: 0.9; margin-top: 2px; }
 
-        .captcha-box {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            text-align: center;
-            width: 320px;
-        }
-
-        .level-badge {
-            display: inline-block;
-            background-color: #ff4757;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        /* 總耗時顯示看板 */
-        #stopwatch {
-            font-size: 22px;
-            font-weight: bold;
-            color: #2ed573;
-            margin: 8px 0;
-            font-family: monospace;
-        }
-
-        #puzzle-container {
-            width: 280px;
-            height: 280px;
-            margin: 10px auto;
-            background-color: #ddd;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            padding: 2px;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
-
-        .tile {
-            width: 100%;
-            background-image: url('https://picsum.photos/280/280');
-            background-size: 280px 280px;
-            cursor: pointer;
-            border-radius: 4px;
-            box-sizing: border-box;
-            transition: transform 0.1s, border 0.1s;
-        }
-
-        .tile.selected {
-            outline: 4px solid #ff4757;
-            transform: scale(0.98);
-            z-index: 2;
-        }
-
-        #status {
-            font-weight: bold;
-            height: 20px;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #a4b0be;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: not-allowed;
-            margin-top: 5px;
-        }
-
-        .submit-btn.active {
-            background-color: #ff4757;
-            cursor: pointer;
-        }
-
-        /* 排行榜樣式 */
-        .leaderboard {
-            margin-top: 15px;
-            text-align: left;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        .leaderboard h4 {
-            margin: 0 0 5px 0;
-            text-align: center;
-        }
-        .leaderboard ol {
-            margin: 0;
-            padding-left: 20px;
-        }
-    </style>
+    /* 排行榜樣式 */
+    .leaderboard-box {
+      margin-top: 20px;
+      background: #ffffff;
+      border: 2px solid #ffb6c1;
+      border-radius: 16px;
+      padding: 15px 20px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-sizing: border-box;
+    }
+    .leaderboard-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #d87093;
+      margin-bottom: 10px;
+    }
+    .leaderboard-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: left;
+    }
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #ffd1dc;
+      font-size: 14px;
+      color: #555;
+    }
+    .leaderboard-item:last-child { border-bottom: none; }
+    .rank-num { font-weight: bold; color: #ff69b4; width: 30px; }
+    .player-name { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .player-score { font-weight: bold; color: #d87093; }
+  </style>
 </head>
 <body>
 
-<div class="captcha-box">
-    <div id="level-badge" class="level-badge">關卡 1 / 3 (4 格挑戰)</div>
-    
-    <!-- 累積計時器與關卡限時 -->
-    <div id="stopwatch">總花費時間: 0.00 秒</div>
-    <div id="status">本關剩餘: <span id="timer" style="color: red;">15</span>s</div>
+<div id="game-container">
+  <div class="game-instructions">
+    <div class="zh-text">請點選「遊戲開始」，幫Becky把眼鏡擦乾淨，看看30秒可以擦完幾副眼鏡！</div>
+    <div class="en-text">Click "Start Game" and wipe Becky's glasses clean. See how many pairs of glasses you can wipe in 30 seconds!</div>
+  </div>
 
-    <div id="puzzle-container"></div>
-
-    <button id="buy-btn" class="submit-btn" disabled onclick="enterTicketPage()">等待全關卡通過...</button>
-
-    <!-- 歷史名次榜 -->
-    <div class="leaderboard">
-        <h4>🏆 最佳搶票速度排行榜</h4>
-        <ol id="high-scores"></ol>
+  <div class="info-panel">
+    <div class="info-box">
+      <div class="info-main">時間：<span id="timer">30</span> 秒</div>
+      <div class="info-sub">Time: <span id="timer-en">30</span>s</div>
     </div>
+    <div class="info-box">
+      <div class="info-main">幫 Becky 擦乾淨：<span id="score">0</span> 副</div>
+      <div class="info-sub">Cleaned: <span id="score-en">0</span></div>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <br>
+
+  <button id="start-btn" onclick="startGame()">
+    <span class="btn-zh">開始遊戲</span>
+    <span class="btn-en">Start Game</span>
+  </button>
+
+  <!-- 全球排行榜 UI -->
+  <div class="leaderboard-box">
+    <div class="leaderboard-title">🏆 全球排行榜 Global Leaderboard</div>
+    <ol class="leaderboard-list" id="leaderboard"></ol>
+  </div>
 </div>
 
 <script>
-    const container = document.getElementById('puzzle-container');
-    const timerEl = document.getElementById('timer');
-    const stopwatchEl = document.getElementById('stopwatch');
-    const buyBtn = document.getElementById('buy-btn');
-    const statusEl = document.getElementById('status');
-    const levelBadge = document.getElementById('level-badge');
-    const highScoresEl = document.getElementById('high-scores');
+// ⚠️ 請填入你在 Firebase 申請到的 Realtime Database URL
+const FIREBASE_DB_URL = "YOUR_FIREBASE_DATABASE_URL";
 
-    const levels = [
-        { level: 1, pieces: 4, time: 15 },
-        { level: 2, pieces: 5, time: 15 },
-        { level: 3, pieces: 6, time: 20 }
-    ];
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-    let currentLevelIndex = 0;
-    let currentOrder = [];
-    let selectedIndex = null;
-    let timeLeft = 0;
+const fogCanvas = document.createElement('canvas');
+fogCanvas.width = 400;
+fogCanvas.height = 400;
+const fogCtx = fogCanvas.getContext('2d');
+
+const imgBecky = new Image(); imgBecky.src = 'becky.png';
+const imgCloth = new Image(); imgCloth.src = 'cloth.png';
+const imgMask = new Image(); imgMask.src = 'mask.png';
+
+let score = 0;
+let timeLeft = 30;
+let gameInterval = null;
+let isPlaying = false;
+
+let mousePos = { x: 200, y: 200 };
+let leftHits = 0;
+let rightHits = 0;
+
+const leftLens = { x: 155, y: 195 };
+const rightLens = { x: 245, y: 195 };
+
+function resetFog() {
+  leftHits = 0;
+  rightHits = 0;
+  fogCtx.clearRect(0, 0, 400, 400);
+
+  if (imgMask.complete && imgMask.naturalWidth !== 0) {
+    fogCtx.fillStyle = 'rgba(230, 235, 245, 0.6)';
+    fogCtx.fillRect(0, 0, 400, 400);
+
+    fogCtx.globalCompositeOperation = 'destination-in';
+    fogCtx.drawImage(imgMask, 0, 0, 400, 400);
+    fogCtx.globalCompositeOperation = 'source-over';
+  }
+}
+
+function getCanvasPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+
+  let clientX = e.clientX;
+  let clientY = e.clientY;
+
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  }
+
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY
+  };
+}
+
+function handleWipe(pos) {
+  if (!isPlaying) return;
+
+  const inLeft = Math.abs(pos.x - leftLens.x) < 50 && Math.abs(pos.y - leftLens.y) < 40;
+  const inRight = Math.abs(pos.x - rightLens.x) < 50 && Math.abs(pos.y - rightLens.y) < 40;
+
+  let erased = false;
+  if (inLeft && leftHits < 5) { leftHits++; erased = true; }
+  else if (inRight && rightHits < 5) { rightHits++; erased = true; }
+
+  if (erased) {
+    fogCtx.globalCompositeOperation = 'destination-out';
+    fogCtx.beginPath();
+    fogCtx.arc(pos.x, pos.y, 32, 0, Math.PI * 2);
+    fogCtx.fill();
+    fogCtx.globalCompositeOperation = 'source-over';
+  }
+
+  if (leftHits >= 5 && rightHits >= 5) {
+    score++;
+    updateUI();
+    resetFog();
+  }
+}
+
+function updateUI() {
+  document.getElementById('score').innerText = score;
+  document.getElementById('score-en').innerText = score;
+  document.getElementById('timer').innerText = timeLeft;
+  document.getElementById('timer-en').innerText = timeLeft;
+}
+
+// 監聽事件
+canvas.addEventListener('mousemove', (e) => { mousePos = getCanvasPos(e); if (!isPlaying) drawScene(); });
+canvas.addEventListener('click', (e) => { handleWipe(getCanvasPos(e)); });
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); mousePos = getCanvasPos(e); handleWipe(mousePos); }, { passive: false });
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); mousePos = getCanvasPos(e); handleWipe(mousePos); }, { passive: false });
+
+function startGame() {
+  score = 0;
+  timeLeft = 30;
+  isPlaying = true;
+  updateUI();
+  resetFog();
+
+  if (gameInterval) clearInterval(gameInterval);
+
+  gameInterval = setInterval(() => {
+    timeLeft--;
+    updateUI();
+    if (timeLeft <= 0) {
+      clearInterval(gameInterval);
+      isPlaying = false;
+      finishGame();
+    }
+  }, 1000);
+
+  gameLoop();
+}
+
+function finishGame() {
+  const playerName = prompt(`🎉 時間到！ Time's up!\n你成功幫 Becky 擦乾淨了 ${score} 副眼鏡！\n請輸入你的名字以登記排行榜 (Enter your name for the leaderboard):`, "Becky Fan");
+  
+  if (playerName && FIREBASE_DB_URL !== "YOUR_FIREBASE_DATABASE_URL") {
+    submitScore(playerName, score);
+  } else {
+    fetchLeaderboard();
+  }
+}
+
+// 提交成績至 Firebase
+async function submitScore(name, finalScore) {
+  try {
+    await fetch(`${FIREBASE_DB_URL}/scores.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, score: finalScore, timestamp: Date.now() })
+    });
+    fetchLeaderboard();
+  } catch (err) {
+    console.error("提交成績失敗:", err);
+  }
+}
+
+// 讀取全球前 10 名排行榜
+async function fetchLeaderboard() {
+  if (FIREBASE_DB_URL === "YOUR_FIREBASE_DATABASE_URL") return;
+
+  try {
+    const res = await fetch(`${FIREBASE_DB_URL}/scores.json`);
+    const data = await res.json();
     
-    // 計時變數
-    let timerInterval;
-    let stopwatchInterval;
-    let startTime = 0;
-    let totalElapsedTime = 0;
+    if (!data) return;
 
-    const imgHeight = 276;
+    const scoresArray = Object.values(data);
+    scoresArray.sort((a, b) => b.score - a.score); // 依分數由高到低排序
 
-    function startLevel(levelIndex) {
-        const config = levels[levelIndex];
-        levelBadge.innerText = `關卡 ${config.level} / ${levels.length} (${config.pieces} 格挑戰)`;
-        timeLeft = config.time;
-        timerEl.innerText = timeLeft;
-        selectedIndex = null;
+    const top10 = scoresArray.slice(0, 10);
+    const listEl = document.getElementById('leaderboard');
+    listEl.innerHTML = '';
 
-        // 若是第一關，啟動總時間計時器
-        if (levelIndex === 0) {
-            startTime = Date.now();
-            startStopwatch();
-        }
+    top10.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'leaderboard-item';
+      li.innerHTML = `
+        <span class="rank-num">#${index + 1}</span>
+        <span class="player-name">${escapeHTML(item.name)}</span>
+        <span class="player-score">${item.score} 副</span>
+      `;
+      listEl.appendChild(li);
+    });
+  } catch (err) {
+    console.error("讀取排行榜失敗:", err);
+  }
+}
 
-        currentOrder = Array.from({ length: config.pieces }, (_, i) => i);
-        do {
-            currentOrder.sort(() => Math.random() - 0.5);
-        } while (isCorrect());
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+}
 
-        renderTiles();
-        startLevelTimer();
-    }
+function gameLoop() {
+  drawScene();
+  if (isPlaying) requestAnimationFrame(gameLoop);
+}
 
-    function renderTiles() {
-        container.innerHTML = '';
-        const config = levels[currentLevelIndex];
-        const pieceHeight = imgHeight / config.pieces;
+function drawScene() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (imgBecky.complete && imgBecky.naturalWidth !== 0) ctx.drawImage(imgBecky, 0, 0, 400, 400);
+  else { ctx.fillStyle = "#e0e0e0"; ctx.fillRect(0, 0, 400, 400); }
 
-        currentOrder.forEach((posIndex, currentIndex) => {
-            const tile = document.createElement('div');
-            tile.className = 'tile';
-            tile.style.height = `${pieceHeight}px`;
+  ctx.drawImage(fogCanvas, 0, 0);
 
-            const posY = -posIndex * pieceHeight;
-            tile.style.backgroundPosition = `0px ${posY}px`;
+  const clothSize = 70;
+  if (imgCloth.complete && imgCloth.naturalWidth !== 0) {
+    ctx.drawImage(imgCloth, mousePos.x - clothSize / 2, mousePos.y - clothSize / 2, clothSize, clothSize);
+  } else {
+    ctx.fillStyle = "rgba(255, 105, 180, 0.8)";
+    ctx.beginPath();
+    ctx.arc(mousePos.x, mousePos.y, 20, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
 
-            if (selectedIndex === currentIndex) {
-                tile.classList.add('selected');
-            }
+let loadedCount = 0;
+const checkAllLoaded = () => {
+  loadedCount++;
+  if (loadedCount >= 2) {
+    resetFog();
+    drawScene();
+    fetchLeaderboard();
+  }
+};
 
-            tile.onclick = () => handleTileClick(currentIndex);
-            container.appendChild(tile);
-        });
-    }
-
-    function handleTileClick(index) {
-        if (timeLeft <= 0) return;
-
-        if (selectedIndex === null) {
-            selectedIndex = index;
-        } else if (selectedIndex === index) {
-            selectedIndex = null;
-        } else {
-            const temp = currentOrder[selectedIndex];
-            currentOrder[selectedIndex] = currentOrder[index];
-            currentOrder[index] = temp;
-            selectedIndex = null;
-
-            if (isCorrect()) {
-                handleLevelComplete();
-            }
-        }
-        renderTiles();
-    }
-
-    function isCorrect() {
-        return currentOrder.every((val, index) => val === index);
-    }
-
-    // 總耗時毫秒計時器
-    function startStopwatch() {
-        clearInterval(stopwatchInterval);
-        stopwatchInterval = setInterval(() => {
-            totalElapsedTime = (Date.now() - startTime) / 1000;
-            stopwatchEl.innerText = `總花費時間: ${totalElapsedTime.toFixed(2)} 秒`;
-        }, 30);
-    }
-
-    // 單關倒數計時器
-    function startLevelTimer() {
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            timerEl.innerText = timeLeft;
-
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                clearInterval(stopwatchInterval);
-                statusEl.innerHTML = "<span style='color:red;'>逾時失敗！重新挑戰</span>";
-                setTimeout(resetAll, 1500);
-            }
-        }, 1000);
-    }
-
-    function handleLevelComplete() {
-        clearInterval(timerInterval);
-
-        if (currentLevelIndex + 1 < levels.length) {
-            statusEl.innerHTML = "<span style='color:green;'>✓ 通過！準備進入下一關...</span>";
-            currentLevelIndex++;
-            setTimeout(() => {
-                statusEl.innerHTML = '本關剩餘: <span id="timer" style="color: red;">15</span>s';
-                startLevel(currentLevelIndex);
-            }, 800);
-        } else {
-            // 通過所有關卡：停止總計時並紀錄成績
-            clearInterval(stopwatchInterval);
-            statusEl.innerHTML = "<span style='color:green;'>🎉 驗證成功！已獲得購票資格</span>";
-            
-            saveScore(totalElapsedTime);
-            
-            buyBtn.disabled = false;
-            buyBtn.classList.add('active');
-            buyBtn.innerText = `立即搶票 (總費時: ${totalElapsedTime.toFixed(2)}s)`;
-        }
-    }
-
-    function resetAll() {
-        currentLevelIndex = 0;
-        statusEl.innerHTML = '本關剩餘: <span id="timer" style="color: red;">15</span>s';
-        buyBtn.disabled = true;
-        buyBtn.classList.remove('active');
-        buyBtn.innerText = "等待全關卡通過...";
-        startLevel(currentLevelIndex);
-    }
-
-    // 排行榜紀錄邏輯 (由短至長排序)
-    function saveScore(score) {
-        let scores = JSON.parse(localStorage.getItem('ticket_captcha_scores') || '[]');
-        scores.push(score);
-        scores.sort((a, b) => a - b); // 最短時間排前面
-        scores = scores.slice(0, 5); // 只留前 5 名
-        localStorage.setItem('ticket_captcha_scores', JSON.stringify(scores));
-        updateLeaderboardDisplay();
-    }
-
-    function updateLeaderboardDisplay() {
-        let scores = JSON.parse(localStorage.getItem('ticket_captcha_scores') || '[]');
-        highScoresEl.innerHTML = scores.map((s, idx) => 
-            `<li>第 ${idx + 1} 名：<b>${s.toFixed(2)}</b> 秒</li>`
-        ).join('') || '<li>暫無最佳紀錄</li>';
-    }
-
-    function enterTicketPage() {
-        alert(`搶票成功！你的完成時間為：${totalElapsedTime.toFixed(2)} 秒`);
-        resetAll();
-    }
-
-    // 遊戲初始化
-    updateLeaderboardDisplay();
-    startLevel(currentLevelIndex);
+imgBecky.onload = checkAllLoaded;
+imgMask.onload = checkAllLoaded;
+imgCloth.onload = drawScene;
 </script>
 
 </body>
