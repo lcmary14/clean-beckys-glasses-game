@@ -175,7 +175,7 @@
 
   <!-- 全球排行榜 UI -->
   <div class="leaderboard-box">
-    <div class="leaderboard-title">🏆 全球排行榜 Top 15 Global Leaderboard</div>
+    <div class="leaderboard-title">🏆 全球排行榜 Global Leaderboard</div>
     <ol class="leaderboard-list" id="leaderboard"></ol>
   </div>
 
@@ -380,7 +380,7 @@ async function fetchLeaderboard() {
     const scoresArray = Object.values(data);
     scoresArray.sort((a, b) => b.score - a.score);
 
-    const top10 = scoresArray.slice(0, 10);
+    const top10 = scoresArray.slice(0, 15);
 
     top10.forEach((item, index) => {
       const li = document.createElement('li');
