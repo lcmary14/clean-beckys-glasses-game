@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>Becky 30秒極速擦眼鏡挑戰！</title>
+  <style>
+    body {
+      background: #fff0f5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      user-select: none;
+    }
+    #game-container {
+      text-align: center;
+      position: relative;
+    }
+    canvas {
+      border: 4px solid #ffb6c1;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      cursor: none;
+    }
+    .info-panel {
+      display: flex;
+      justify-content: space-between;
+      width: 400px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #d87093;
+      margin-bottom: 12px;
+    }
+    button {
+      padding: 12px 28px;
+      font-size: 18px;
+      background: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    button:hover { background: #ff1493; transform: scale(1.05); }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <div class="info-panel">
+    <div>時間：<span id="timer">30</span> 秒</div>
+    <div>幫 Becky 擦乾淨：<span id="score">0</span> 隻</div>
+  </div>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <br>
+  <button id="start-btn" onclick="startGame()">開始遊戲</button>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// 離屏 Canvas 處理霧氣遮罩
+const fogCanvas = document.createElement('canvas');
+fogCanvas.width = 400;
+fogCanvas.height = 400;
+const fogCtx = fogCanvas.getContext('2d');
+
+// 載入素材
+const imgBecky = new Image();
+imgBecky.src = 'becky.png';
+
+const imgCloth = new Image();
+imgCloth.src = 'cloth.png';
+
+const imgMask = new Image();
+imgMask.src = 'mask.png';
+
+let score = 0;
+let timeLeft = 30;
+let gameInterval = null;
+let isPlaying = false;
+
+let mousePos = { x: 200, y: 200 };
+let leftHits = 0;
+let rightHits = 0;
+
+// 左右鏡片中心點
+const leftLens = { x: 155, y: 195 };
+const rightLens = { x: 245, y: 195 };
+
+// 重置霧氣（透明度設為 60%）
+function resetFog() {
+  leftHits = 0;
+  rightHits = 0;
+
+  fogCtx.clearRect(0, 0, 400, 400);
+
+  if (imgMask.complete && imgMask.naturalWidth !== 0) {
+    // 💡 1. 霧氣透明度設定為 60% (alpha 0.6)
+    fogCtx.fillStyle = 'rgba(230, 235, 245, 0.6)';
+    fogCtx.fillRect(0, 0, 400, 400);
+
+    // 2. 裁剪成 mask.png 的鏡片形狀
+    fogCtx.globalCompositeOperation = 'destination-in';
+    fogCtx.drawImage(imgMask, 0, 0, 400, 400);
+    fogCtx.globalCompositeOperation = 'source-over';
+  }
+}
+
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  mousePos.x = e.clientX - rect.left;
+  mousePos.y = e.clientY - rect.top;
+  if (!isPlaying) drawScene();
+});
+
+// 點擊擦拭邏輯（提高靈敏度）
+canvas.addEventListener('click', () => {
+  if (!isPlaying) return;
+
+  // 💡 放寬判定範圍至 50x40 像素，更容易點中
+  const inLeft = Math.abs(mousePos.x - leftLens.x) < 50 && 
+                 Math.abs(mousePos.y - leftLens.y) < 40;
+
+  const inRight = Math.abs(mousePos.x - rightLens.x) < 50 && 
+                  Math.abs(mousePos.y - rightLens.y) < 40;
+
+  let erased = false;
+
+  // 💡 下降目標次數至 5 下，速度更快
+  if (inLeft && leftHits < 5) {
+    leftHits++;
+    erased = true;
+  } else if (inRight && rightHits < 5) {
+    rightHits++;
+    erased = true;
+  }
+
+  // 💡 擦除半徑放大到 32px，一次擦乾淨大半區域
+  if (erased) {
+    fogCtx.globalCompositeOperation = 'destination-out';
+    fogCtx.beginPath();
+    fogCtx.arc(mousePos.x, mousePos.y, 32, 0, Math.PI * 2);
+    fogCtx.fill();
+    fogCtx.globalCompositeOperation = 'source-over';
+  }
+
+  if (leftHits >= 5 && rightHits >= 5) {
+    score++;
+    document.getElementById('score').innerText = score;
+    resetFog();
+  }
+});
+
+function startGame() {
+  score = 0;
+  timeLeft = 30;
+  isPlaying = true;
+  document.getElementById('score').innerText = score;
+  document.getElementById('timer').innerText = timeLeft;
+
+  resetFog();
+
+  if (gameInterval) clearInterval(gameInterval);
+
+  gameInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').innerText = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(gameInterval);
+      isPlaying = false;
+      alert(`🎉 時間到！你成功幫 Becky 擦乾淨了 ${score} 隻眼鏡！`);
+    }
+  }, 1000);
+
+  gameLoop();
+}
+
+function gameLoop() {
+  drawScene();
+  if (isPlaying) requestAnimationFrame(gameLoop);
+}
+
+function drawScene() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // A. Becky 底圖
+  if (imgBecky.complete && imgBecky.naturalWidth !== 0) {
+    ctx.drawImage(imgBecky, 0, 0, 400, 400);
+  } else {
+    ctx.fillStyle = "#e0e0e0";
+    ctx.fillRect(0, 0, 400, 400);
+  }
+
+  // B. 疊加 60% 透明度霧氣層
+  ctx.drawImage(fogCanvas, 0, 0);
+
+  // C. 眼鏡布/手 (70x70 像素)
+  const clothSize = 70;
+  if (imgCloth.complete && imgCloth.naturalWidth !== 0) {
+    ctx.drawImage(imgCloth, mousePos.x - clothSize / 2, mousePos.y - clothSize / 2, clothSize, clothSize);
+  } else {
+    ctx.fillStyle = "rgba(255, 105, 180, 0.8)";
+    ctx.beginPath();
+    ctx.arc(mousePos.x, mousePos.y, 20, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// 素材預載保護
+let loadedCount = 0;
+const checkAllLoaded = () => {
+  loadedCount++;
+  if (loadedCount >= 2) {
+    resetFog();
+    drawScene();
+  }
+};
+
+imgBecky.onload = checkAllLoaded;
+imgMask.onload = checkAllLoaded;
+imgCloth.onload = drawScene;
+</script>
+
+</body>
+</html>
