@@ -3,41 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
-  <!-- 1. 基礎 SEO 設定 -->
-  <title>Becky 30秒極速擦眼鏡挑戰！粉絲互動小遊戲</title>
-  <meta name="description" content="快來挑戰 30 秒極速幫 Becky 擦乾淨眼鏡！看看你能擦幾副眼鏡，登上全球擦眼鏡大師排行榜，一起應援 Becky！">
-  <meta name="keywords" content="Becky, Rebecca Patricia Armstrong, 擦眼鏡遊戲, 粉絲應援, 互動小遊戲, IDOLFACTORY">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://your-domain.com/">
-
-  <!-- 2. Open Graph (FB, LINE, Threads 預覽卡片) -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Becky 30秒極速擦眼鏡挑戰！">
-  <meta property="og:description" content="快來幫 Becky 把眼鏡擦乾淨！30 秒你能擦幾副？挑戰全球粉絲排行榜！">
-  <meta property="og:image" content="https://your-domain.com/becky.png">
-  <meta property="og:url" content="https://your-domain.com/">
-  <meta property="og:site_name" content="Becky 擦眼鏡小遊戲">
-
-  <!-- 3. Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Becky 30秒極速擦眼鏡挑戰！">
-  <meta name="twitter:description" content="快來幫 Becky 把眼鏡擦乾淨！30 秒你能擦幾副？挑戰全球粉絲排行榜！">
-  <meta name="twitter:image" content="https://your-domain.com/becky.png">
-
-  <!-- 4. Schema.org 結構化資料 -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Becky 30秒極速擦眼鏡挑戰",
-    "operatingSystem": "Web",
-    "applicationCategory": "GameApplication",
-    "genre": "Casual Game",
-    "description": "幫助 Becky 在 30 秒內擦乾淨眼鏡的粉絲互動小遊戲。"
-  }
-  </script>
-
+  <title>Becky 30秒極速擦眼鏡挑戰！</title>
   <style>
     body {
       background: #fff0f5;
@@ -60,16 +26,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-    .seo-title {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
     }
     .game-instructions {
       background: #ffffff;
@@ -189,7 +145,7 @@
     .copyright-section:last-child { margin-bottom: 0; }
     .copyright-title { font-weight: bold; color: #b56576; }
 
-    /* 自訂 Modal 彈出視窗樣式 */
+    /* 自訂 Modal 彈出視窗樣式（替代原生 prompt/alert，防攔截） */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -205,12 +161,12 @@
       border-radius: 20px;
       padding: 20px;
       width: 85%;
-      max-width: 340px;
+      max-width: 320px;
       text-align: center;
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
     .modal-title { font-size: 18px; font-weight: bold; color: #d87093; margin-bottom: 8px; }
-    .modal-msg { font-size: 14px; color: #666; margin-bottom: 12px; line-height: 1.4; }
+    .modal-msg { font-size: 14px; color: #666; margin-bottom: 15px; line-height: 1.4; }
     .modal-input {
       width: 100%;
       padding: 10px;
@@ -220,42 +176,9 @@
       box-sizing: border-box;
       text-align: center;
       outline: none;
-      margin-bottom: 12px;
-    }
-    .modal-input:focus { border-color: #ff69b4; }
-    
-    /* 社群分享按鈕區 */
-    .share-section-title {
-      font-size: 12px;
-      color: #b56576;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
-    .share-btn-group {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
       margin-bottom: 15px;
     }
-    .share-btn {
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 0;
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .share-btn:hover { transform: scale(1.03); opacity: 0.9; }
-    .btn-line { background: #06C755; }
-    .btn-twitter { background: #000000; }
-    .btn-copy { background: #7b68ee; }
-
+    .modal-input:focus { border-color: #ff69b4; }
     .modal-btn-group { display: flex; gap: 10px; justify-content: center; }
     .modal-btn {
       padding: 8px 18px;
@@ -269,12 +192,14 @@
 </head>
 <body>
 
-<main id="game-container">
-  <h1 class="seo-title">Becky 30秒極速擦眼鏡挑戰！粉絲互動小遊戲</h1>
-
+<div id="game-container">
   <div class="game-instructions">
-    <div class="zh-text">請點選「開始遊戲」，幫Becky把眼鏡擦乾淨，<br>看看30秒可以擦完幾副眼鏡！</div>
-    <div class="en-text">Click "Start Game" and wipe Becky's glasses clean.<br>See how many pairs of glasses you can wipe in 30 seconds!</div>
+    <div class="zh-text">請點選「遊戲開始」，幫Becky把眼鏡擦乾淨，<br>
+      看看30秒可以擦完幾副眼鏡！
+  </div>
+    <div class="en-text">Click "Start Game" and wipe Becky's glasses clean.<br> 
+      See how many pairs of glasses you can wipe in 30 seconds!
+  </div>
   </div>
 
   <div class="info-panel">
@@ -297,16 +222,16 @@
   </button>
 
   <!-- 全球排行榜 UI -->
-  <section class="leaderboard-box" aria-label="排行榜">
-    <h2 class="leaderboard-title">
+  <div class="leaderboard-box">
+    <div class="leaderboard-title">
       👓🏆 擦眼鏡大師排行榜 🏆👓<br>
       TOP GLASSES CLEANERS
-    </h2>
+    </div>
     <ol class="leaderboard-list" id="leaderboard"></ol>
-  </section>
+  </div>
 
   <!-- 版權與免責宣告 -->
-  <footer class="copyright-box">
+  <div class="copyright-box">
     <div class="copyright-section">
       <div class="copyright-title"> 版權聲明 </div>
       圖片版權：IDOLFACTORY / CRANIUM<br>
@@ -319,24 +244,15 @@
       Game Creator: Mallie & astro06020616 <br>
       Disclaimer: Non-commercial fan-made content. Photo materials belong to IDOLFACTORY.
     </div>
-  </footer>
-</main>
+  </div>
+</div>
 
-<!-- 自訂彈出視窗（含社群分享按鈕） -->
+<!-- 自訂彈出視窗（替代原生 prompt/alert，防攔截） -->
 <div id="modal-overlay" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-title">🎉 時間到！ Becky 看得好清楚 !</div>
     <div id="modal-msg" class="modal-msg">你成功幫 Becky 擦乾淨了 0 副眼鏡！<br>請輸入你的名字以登記排行榜：</div>
     <input type="text" id="player-name-input" class="modal-input" placeholder="Becky's Angel" maxlength="30">
-    
-    <!-- 社群分享按鈕區塊 -->
-    <div class="share-section-title">✨ 分享你的成績 Share Result ✨</div>
-    <div class="share-btn-group">
-      <button class="share-btn btn-line" onclick="shareToLine()">LINE</button>
-      <button class="share-btn btn-twitter" onclick="shareToTwitter()">X (Twitter)</button>
-      <button class="share-btn btn-copy" onclick="copyShareLink()">複製連結</button>
-    </div>
-
     <div class="modal-btn-group">
       <button class="modal-btn btn-cancel" onclick="closeModal(false)">取消 Cancel</button>
       <button class="modal-btn" onclick="closeModal(true)">送出 Submit</button>
@@ -345,6 +261,7 @@
 </div>
 
 <script>
+// 已設定 Firebase Realtime Database URL
 const FIREBASE_DB_URL = "https://clean-beckys-glasses-game-default-rtdb.firebaseio.com/";
 
 const canvas = document.getElementById('gameCanvas');
@@ -363,9 +280,8 @@ let score = 0;
 let timeLeft = 30;
 let gameInterval = null;
 let isPlaying = false;
-let isMouseDown = false;
 
-let mousePos = { x: 125, y: 195 };
+let mousePos = { x: 110, y: 195 };
 let leftHits = 0;
 let rightHits = 0;
 
@@ -438,26 +354,11 @@ function updateUI() {
   document.getElementById('timer-en').innerText = timeLeft;
 }
 
-canvas.addEventListener('mousedown', (e) => { isMouseDown = true; mousePos = getCanvasPos(e); handleWipe(mousePos); });
-window.addEventListener('mouseup', () => { isMouseDown = false; });
-
-canvas.addEventListener('mousemove', (e) => { 
-  mousePos = getCanvasPos(e); 
-  if (isPlaying && isMouseDown) handleWipe(mousePos);
-  if (!isPlaying) drawScene(); 
-});
-
-canvas.addEventListener('touchstart', (e) => { 
-  e.preventDefault(); 
-  mousePos = getCanvasPos(e); 
-  handleWipe(mousePos); 
-}, { passive: false });
-
-canvas.addEventListener('touchmove', (e) => { 
-  e.preventDefault(); 
-  mousePos = getCanvasPos(e); 
-  handleWipe(mousePos); 
-}, { passive: false });
+// 監聽事件
+canvas.addEventListener('mousemove', (e) => { mousePos = getCanvasPos(e); if (!isPlaying) drawScene(); });
+canvas.addEventListener('click', (e) => { handleWipe(getCanvasPos(e)); });
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); mousePos = getCanvasPos(e); handleWipe(mousePos); }, { passive: false });
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); mousePos = getCanvasPos(e); handleWipe(mousePos); }, { passive: false });
 
 function startGame() {
   score = 0;
@@ -500,41 +401,7 @@ function closeModal(isSubmit) {
   }
 }
 
-/* 社群分享邏輯 */
-function getShareText() {
-  return `👓 我在「Becky 30秒極速擦眼鏡挑戰」成功幫 Becky 擦乾淨了 ${score} 副眼鏡！快來挑戰我的紀錄！ #BeckyArmstrong #Becky擦眼鏡挑戰`;
-}
-
-function shareToLine() {
-  const url = encodeURIComponent(window.location.href);
-  const text = encodeURIComponent(getShareText());
-  window.open(`https://line.me/R/msg/text/?${text}%20${url}`, '_blank');
-}
-
-function shareToTwitter() {
-  const url = encodeURIComponent(window.location.href);
-  const text = encodeURIComponent(getShareText());
-  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-}
-
-function copyShareLink() {
-  const shareText = `${getShareText()}\n${window.location.href}`;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(shareText).then(() => {
-      alert('已複製成績與連結，快去分享給朋友吧！');
-    });
-  } else {
-    const tempInput = document.createElement('textarea');
-    tempInput.value = shareText;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
-    alert('已複製成績與連結！');
-  }
-}
-
-// 提交成績至 Firebase
+// 提交成績至 Firebase（自動修飾名字以符合 Rules 安全驗證）
 async function submitScore(name, finalScore) {
   const trimmedName = name.trim().substring(0, 30) || "Becky's Angel";
 
@@ -561,33 +428,39 @@ async function submitScore(name, finalScore) {
   }
 }
 
-// 讀取全球前 15 名排行榜
+// 讀取全球前 15 名排行榜（含安全驗證與防呆）
 async function fetchLeaderboard() {
+  if (FIREBASE_DB_URL === "YOUR_FIREBASE_DATABASE_URL") return;
+
   try {
     const res = await fetch(`${FIREBASE_DB_URL}/scores.json`);
-    if (!res.ok) return;
+    if (!res.ok) {
+      console.error("讀取排行榜被拒絕，HTTP 狀態碼:", res.status);
+      return;
+    }
 
     const data = await res.json();
     const listEl = document.getElementById('leaderboard');
     listEl.innerHTML = '';
-
+    
     if (!data) {
       listEl.innerHTML = '<li class="leaderboard-item" style="justify-content:center; color:#999;">尚無紀錄，快來搶第一名！</li>';
       return;
     }
 
+    // 將物件轉換為陣列並由高到低排序
     const scoresArray = Object.values(data);
-    scoresArray.sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
+    scoresArray.sort((a, b) => b.score - a.score);
 
-    const top15 = scoresArray.slice(0, 15);
+    const top10 = scoresArray.slice(0, 15);
 
-    top15.forEach((item, index) => {
+    top10.forEach((item, index) => {
       const li = document.createElement('li');
       li.className = 'leaderboard-item';
       li.innerHTML = `
         <span class="rank-num">#${index + 1}</span>
-        <span class="player-name">${escapeHTML(item.name || 'Anonymous')}</span>
-        <span class="player-score">${item.score || 0} 副</span>
+        <span class="player-name">${escapeHTML(item.name)}</span>
+        <span class="player-score">${item.score} 副</span>
       `;
       listEl.appendChild(li);
     });
@@ -609,12 +482,8 @@ function gameLoop() {
 
 function drawScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (imgBecky.complete && imgBecky.naturalWidth !== 0) {
-    ctx.drawImage(imgBecky, 0, 0, 400, 400);
-  } else { 
-    ctx.fillStyle = "#e0e0e0"; 
-    ctx.fillRect(0, 0, 400, 400); 
-  }
+  if (imgBecky.complete && imgBecky.naturalWidth !== 0) ctx.drawImage(imgBecky, 0, 0, 400, 400);
+  else { ctx.fillStyle = "#e0e0e0"; ctx.fillRect(0, 0, 400, 400); }
 
   ctx.drawImage(fogCanvas, 0, 0);
 
@@ -629,21 +498,19 @@ function drawScene() {
   }
 }
 
-function initGame() {
-  resetFog();
-  drawScene();
-  fetchLeaderboard();
-}
-
 let loadedCount = 0;
 const checkAllLoaded = () => {
   loadedCount++;
-  if (loadedCount >= 2) initGame();
+  if (loadedCount >= 2) {
+    resetFog();
+    drawScene();
+    fetchLeaderboard();
+  }
 };
 
-if (imgBecky.complete) checkAllLoaded(); else imgBecky.onload = checkAllLoaded;
-if (imgMask.complete) checkAllLoaded(); else imgMask.onload = checkAllLoaded;
-if (imgCloth.complete) drawScene(); else imgCloth.onload = drawScene;
+imgBecky.onload = checkAllLoaded;
+imgMask.onload = checkAllLoaded;
+imgCloth.onload = drawScene;
 </script>
 
 </body>
