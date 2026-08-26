@@ -105,7 +105,14 @@
       font-size: 18px;
       font-weight: bold;
       color: #d87093;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+    }
+    /* 排行榜備註說明文字樣式 */
+    .leaderboard-note {
+      font-size: 11px;
+      color: #b56576;
+      margin-bottom: 12px;
+      line-height: 1.3;
     }
     .leaderboard-list {
       list-style: none;
@@ -226,6 +233,11 @@
     <div class="leaderboard-title">
       👓🏆 擦眼鏡大師排行榜 🏆👓<br>
       TOP GLASSES CLEANERS
+    </div>
+    <!-- 新增提示說明語句 -->
+    <div class="leaderboard-note">
+      * 同一玩家名稱僅保留個人最高成績<br>
+      * Only the highest score per player is displayed
     </div>
     <ol class="leaderboard-list" id="leaderboard"></ol>
   </div>
@@ -401,7 +413,7 @@ function closeModal(isSubmit) {
   }
 }
 
-// 提交成績至 Firebase（自動修飾名字以符合 Rules 安全驗證）
+// 提交成績至 Firebase
 async function submitScore(name, finalScore) {
   const trimmedName = name.trim().substring(0, 30) || "Becky's Angel";
 
@@ -428,7 +440,7 @@ async function submitScore(name, finalScore) {
   }
 }
 
-// 讀取全球前 15 名排行榜（含安全驗證與防呆）
+// 讀取全球前 15 名排行榜（同名玩家僅保留最高成績）
 async function fetchLeaderboard() {
   if (FIREBASE_DB_URL === "YOUR_FIREBASE_DATABASE_URL") return;
 
@@ -448,13 +460,27 @@ async function fetchLeaderboard() {
       return;
     }
 
-    // 將物件轉換為陣列並由高到低排序
-    const scoresArray = Object.values(data);
-    scoresArray.sort((a, b) => b.score - a.score);
+    // 1. 將 Firebase 物件轉換為陣列
+    const rawScores = Object.values(data);
 
-    const top10 = scoresArray.slice(0, 15);
+    // 2. 去重：同一玩家名稱（去除首尾空白）僅保留最高分
+    const uniqueScoresMap = new Map();
+    rawScores.forEach(item => {
+      const nameKey = (item.name || "").trim();
+      if (!nameKey) return; // 忽略空白名稱
 
-    top10.forEach((item, index) => {
+      if (!uniqueScoresMap.has(nameKey) || item.score > uniqueScoresMap.get(nameKey).score) {
+        uniqueScoresMap.set(nameKey, item);
+      }
+    });
+
+    // 3. 轉回陣列並依分數由高到低排序
+    const sortedScores = Array.from(uniqueScoresMap.values()).sort((a, b) => b.score - a.score);
+
+    // 4. 取前 15 名顯示
+    const top15 = sortedScores.slice(0, 15);
+
+    top15.forEach((item, index) => {
       const li = document.createElement('li');
       li.className = 'leaderboard-item';
       li.innerHTML = `
@@ -515,5 +541,4 @@ imgCloth.onload = drawScene;
 
 </body>
 </html>
-
 
